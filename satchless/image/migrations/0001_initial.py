@@ -1,66 +1,38 @@
-# encoding: utf-8
-import datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
-class Migration(SchemaMigration):
-
-    def forwards(self, orm):
-        
-        # Adding model 'Image'
-        db.create_table('image_image', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('image', self.gf('django.db.models.fields.files.ImageField')(max_length=100)),
-            ('height', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
-            ('width', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
-        ))
-        db.send_create_signal('image', ['Image'])
-
-        # Adding model 'Thumbnail'
-        db.create_table('image_thumbnail', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('original', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['image.Image'])),
-            ('image', self.gf('django.db.models.fields.files.ImageField')(max_length=100)),
-            ('size', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('height', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
-            ('width', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
-        ))
-        db.send_create_signal('image', ['Thumbnail'])
-
-        # Adding unique constraint on 'Thumbnail', fields ['image', 'size']
-        db.create_unique('image_thumbnail', ['image', 'size'])
+from django.db import models, migrations
+import satchless.image.models
 
 
-    def backwards(self, orm):
-        
-        # Removing unique constraint on 'Thumbnail', fields ['image', 'size']
-        db.delete_unique('image_thumbnail', ['image', 'size'])
+class Migration(migrations.Migration):
 
-        # Deleting model 'Image'
-        db.delete_table('image_image')
+    dependencies = [
+    ]
 
-        # Deleting model 'Thumbnail'
-        db.delete_table('image_thumbnail')
-
-
-    models = {
-        'image.image': {
-            'Meta': {'object_name': 'Image'},
-            'height': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'image': ('django.db.models.fields.files.ImageField', [], {'max_length': '100'}),
-            'width': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'})
-        },
-        'image.thumbnail': {
-            'Meta': {'unique_together': "(('image', 'size'),)", 'object_name': 'Thumbnail'},
-            'height': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'image': ('django.db.models.fields.files.ImageField', [], {'max_length': '100'}),
-            'original': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['image.Image']"}),
-            'size': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'width': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'})
-        }
-    }
-
-    complete_apps = ['image']
+    operations = [
+        migrations.CreateModel(
+            name='Image',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('image', models.ImageField(height_field=b'height', width_field=b'width', max_length=255, upload_to=satchless.image.models.image_upload_to)),
+                ('height', models.PositiveIntegerField(default=0, editable=False)),
+                ('width', models.PositiveIntegerField(default=0, editable=False)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Thumbnail',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('image', models.ImageField(height_field=b'height', width_field=b'width', max_length=255, upload_to=satchless.image.models.thumbnail_upload_to)),
+                ('size', models.CharField(max_length=100)),
+                ('height', models.PositiveIntegerField(default=0, editable=False)),
+                ('width', models.PositiveIntegerField(default=0, editable=False)),
+                ('original', models.ForeignKey(to='image.Image')),
+            ],
+        ),
+        migrations.AlterUniqueTogether(
+            name='thumbnail',
+            unique_together=set([('image', 'size')]),
+        ),
+    ]
